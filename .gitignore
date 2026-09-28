@@ -1,0 +1,15 @@
+# Local database and uploaded student files
+data/*.sqlite3
+data/*.sqlite3-*
+uploads/*
+!uploads/.gitkeep
+
+# Python and editor artifacts
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+.DS_Store

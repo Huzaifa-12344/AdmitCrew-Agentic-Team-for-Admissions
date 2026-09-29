@@ -2,6 +2,8 @@
 
 Staff-controlled study-abroad intake, program answers, fictional document checks, and reminder drafts. The project has a browser-based hosted Site plus a small Python demo for the seven acceptance tests.
 
+Live student website: <https://nowshera-study-abroad-desk.eceyildiran771560691.chatgpt.site>
+
 ## Open the public website
 
 The student-facing site and program list are public. Staff records and the Overview are behind the admin password. The Site uses private runtime secrets for authentication; the password is not stored in this repository.

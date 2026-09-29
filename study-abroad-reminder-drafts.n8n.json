@@ -1,0 +1,226 @@
+{
+  "name": "Nowshera Study Abroad - Staff Approved Follow-ups (Every Minute)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "4d0ef0a2-b73e-46be-8a3f-6aaae5238df2",
+      "name": "Run manually for a test",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "id": "28543ba9-adf6-4654-9a75-d01d0a997181",
+      "name": "Har 1 minute",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://nowshera-study-abroad-desk.eceyildiran771560691.chatgpt.site/api/reminders/run",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "c1779079-942f-4e7d-88c7-9385e7f1a3c1",
+      "name": "Ask the website to create reminder drafts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        560,
+        360
+      ],
+      "notesInFlow": true,
+      "notes": "This endpoint should only create pending approval drafts for students quiet for 3+ days. It must not send WhatsApp, SMS, or email. Staff review and approval remain in the website."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d0dbe459-9f73-4de7-8429-80644d9a58ce",
+              "leftValue": "={{ $json.created }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a0a5104c-8428-49c0-9314-0e8ecfc15086",
+      "name": "Were any drafts created?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        840,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c52ccf6e-9ed6-49b9-9cdb-831f02b93f19",
+              "name": "result",
+              "value": "Reminder drafts were created. Open the website's staff approval queue to review them.",
+              "type": "string"
+            },
+            {
+              "id": "b3d35a1d-640b-4d72-92ef-13d6f9e06d66",
+              "name": "draftsCreated",
+              "value": "={{ $json.created }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e8142bcf-fd5c-4aca-81fc-c1334cb97553",
+      "name": "Show pending approval result",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1120,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9e915005-e91c-4a76-9c0a-7b2b1f38fd46",
+              "name": "result",
+              "value": "No new reminder drafts were needed. Existing drafts are left unchanged.",
+              "type": "string"
+            },
+            {
+              "id": "b934c5cc-f0f4-4eb0-a532-d378f0d98e59",
+              "name": "draftsCreated",
+              "value": 0,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7a8f238a-2d02-40ba-85f6-fd6f37e0934e",
+      "name": "Show no-new-drafts result",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1120,
+        460
+      ]
+    },
+    {
+      "parameters": {
+        "content": "Website agents handle intake, university-list answers, and document checks. This workflow handles scheduled follow-up drafts only. A staff member must approve each message in the website before any real send integration is added.",
+        "height": 160,
+        "width": 390
+      },
+      "id": "98b29081-9057-4b0a-b248-5e7de7b159d2",
+      "name": "Staff approval boundary",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        520,
+        80
+      ]
+    }
+  ],
+  "connections": {
+    "Run manually for a test": {
+      "main": [
+        [
+          {
+            "node": "Ask the website to create reminder drafts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+      "Har 1 minute": {
+      "main": [
+        [
+          {
+            "node": "Ask the website to create reminder drafts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ask the website to create reminder drafts": {
+      "main": [
+        [
+          {
+            "node": "Were any drafts created?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Were any drafts created?": {
+      "main": [
+        [
+          {
+            "node": "Show pending approval result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Show no-new-drafts result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Karachi"
+  },
+  "active": false
+}

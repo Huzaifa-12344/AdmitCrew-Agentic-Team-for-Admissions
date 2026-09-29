@@ -1,54 +1,47 @@
-# AdmitCrew — Nowshera Study Abroad Agent Team
+# Nowshera Study Abroad Agent Team
 
-A local, staff-controlled demo for welcoming study-abroad leads, answering from an office program list, reviewing fictional test documents, and preparing follow-up drafts for staff approval.
+Staff-controlled study-abroad intake, program answers, fictional document checks, and reminder drafts. The project has a browser-based hosted Site plus a small Python demo for the seven acceptance tests.
 
-## Download and run
+## Open the public website
 
-Requirements: Python 3.10 or newer. There are no third-party Python packages, paid APIs, or API keys to configure.
+The student-facing site and program list are public. Staff records and the Overview are behind the admin password. The Site uses private runtime secrets for authentication; the password is not stored in this repository.
+
+## Run the Python acceptance-test demo
+
+Requirements: Python 3.10+; no package installation or API key.
 
 ```bash
-git clone https://github.com/Huzaifa-12344/AdmitCrew-Agentic-Team-for-Admissions.git
-cd AdmitCrew-Agentic-Team-for-Admissions
 python3 server.py
 ```
 
-On Windows, run `py server.py` instead. Open <http://localhost:8000>. Stop the server with `Ctrl+C`.
-
-At first start, the app creates `data/study_abroad.sqlite3` and seeds 15 practice programs and the sample leads Ali Khan, Ayesha Noor, and Hamza Iqbal. Restarting the server preserves your local database. To choose a different port, set `PORT` before starting it (for example, `PORT=8010 python3 server.py`).
-
-## What is included
-
-- `server.py` — Python standard-library HTTP server, SQLite setup, seed data, APIs, deterministic agent rules, and document text checks.
-- `src/` — responsive browser dashboard and student chat interface.
-- `data/test-documents/` — fictional PDFs for exercising the document checker. These are synthetic test files, not real student records.
-- `tests/run_tests.py` — seven repeatable acceptance tests.
-- `DEMO-WALKTHROUGH.md` — a step-by-step live demo guide.
-
-## Run the seven acceptance tests
-
-From the project root, in a second terminal while the website is not already using port 8000, run:
+Open <http://localhost:8000>. The first run seeds 15 example programs and Ali, Ayesha, and Hamza. To run the 7 acceptance checks:
 
 ```bash
 python3 tests/run_tests.py
 ```
 
-The script starts the local server, clears and reseeds demo activity, checks all seven acceptance cases, and stops its server. It resets chat, document, and reminder activity, so do not run it while preserving a demo session. A successful run prints seven `PASS` lines and `OK`.
+This resets local demo conversations, document results, and reminder drafts; it does not contact students.
 
-## How the agents work
+## Run the hosted Site source locally
 
-1. **Welcome and intake** saves student details against a normalized phone number, avoiding duplicate leads.
-2. **University guide** answers only with matching records in the local program list. Unsupported study questions are added to the staff queue; unrelated questions receive a polite boundary response.
-3. **Document review** reads searchable text from PDF or TXT uploads and flags an expired passport or a name mismatch for staff review. It does not decide admission eligibility and does not perform OCR on scanned photos.
-4. **Follow-up** drafts reminders for leads quiet for three or more days. Drafts stay in the approval queue until staff approves.
-5. **Staff dashboard** shows leads, chats, program data, document results, and reminder status.
+The exact hosted Site source is included as `hosted-site-source.zip` in the GitHub repository. Extract it, open the `hosted-site` folder, then:
 
-## Important demo limits
+```bash
+npm run install:ci
+cp .dev.vars.example .dev.vars
+```
 
-- The sample tuition, deadlines, and requirements are practice data. Verify real university information before using it with students.
-- **No email, WhatsApp, SMS, or other external message is sent.** “Approve & mark sent” records a one-time approval in the local demo outbox only.
-- This is a local demonstration, not a secured production service. Do not expose it publicly or upload real passports, transcripts, or other sensitive student data.
-- No AI API key is needed or included. The example flows use local data and deterministic rules.
+Set private values in `.dev.vars`, then run `npm run dev`. Never commit `.dev.vars`. Node.js 22.13+ is required. The Site uses local Cloudflare D1/R2 bindings for development; see `PROJECT-GUIDE.md` and `README.md` inside the archive for setup details.
 
-## Data files
+## Reminder workflow
 
-The SQLite database and uploaded demo files are generated locally and ignored by Git. The fictional source PDFs in `data/test-documents/` are included so the document tests can be run immediately. Delete `data/study_abroad.sqlite3` only if you want a fresh database and seed data on the next startup.
+`study-abroad-reminder-drafts.n8n.json` runs every minute and calls `/api/reminders/run`, which creates drafts only. Import and activate it in n8n. Each draft remains pending until a staff member approves it in the dashboard.
+
+**Email, WhatsApp, and SMS delivery are not configured.** Approving currently records the item as sent in the demo outbox; it does not contact the student. An office email account and provider credentials are required to enable actual email delivery.
+
+## Safety and data
+
+- Fees, dates, marks, and IELTS values are practice data; staff must verify real admissions facts.
+- Use only the fictional PDFs in `data/test-documents/`. Do not upload genuine student passports or transcripts to this demo.
+- Document checking reads searchable PDF text; it is not OCR and does not decide eligibility.
+- SQLite databases and uploaded files are generated locally and ignored by Git. No API key is needed.
